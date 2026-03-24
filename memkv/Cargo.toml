@@ -1,0 +1,23 @@
+[package]
+name = "memkv"
+version = "0.1.0"
+edition = "2021"
+description = "A distributed in-memory key-value store — DDIA concept implementation"
+authors = []
+
+[lib]
+name = "memkv"
+path = "src/lib.rs"
+
+[[bin]]
+name = "memkv-server"
+path = "src/main.rs"
+
+[[bin]]
+name = "memkv-client"
+path = "src/bin/client.rs"
+
+[dependencies]
+
+[dev-dependencies]
+
