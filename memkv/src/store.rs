@@ -8,13 +8,15 @@
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
+type Db = Arc<RwLock<HashMap<String, String>>>; 
+
 /// A cloneable handle to the shared in-memory store.
 ///
 /// Cloning a `Store` produces another handle to the *same* underlying data,
 /// making it cheap to hand out to each connection-handler thread.
 #[derive(Clone)]
 pub struct Store {
-    inner: Arc<RwLock<HashMap<String, String>>>,
+    db: Db,
 }
 
 impl Store {
@@ -27,7 +29,7 @@ impl Store {
 
     /// Insert or update `key` with `value`. Returns the previous value, if any.
     pub fn set(&self, key: String, value: String) -> Option<String> {
-        self.inner
+        self.db
             .write()
             .expect("store lock poisoned")
             .insert(key, value)
@@ -35,7 +37,7 @@ impl Store {
 
     /// Return the value stored under `key`, or `None` if it does not exist.
     pub fn get(&self, key: &str) -> Option<String> {
-        self.inner
+        self.db
             .read()
             .expect("store lock poisoned")
             .get(key)
@@ -44,7 +46,7 @@ impl Store {
 
     /// Remove `key` from the store. Returns `true` if the key existed.
     pub fn del(&self, key: &str) -> bool {
-        self.inner
+        self.db
             .write()
             .expect("store lock poisoned")
             .remove(key)
@@ -53,7 +55,7 @@ impl Store {
 
     /// Return `true` if `key` is present in the store.
     pub fn exists(&self, key: &str) -> bool {
-        self.inner
+        self.db
             .read()
             .expect("store lock poisoned")
             .contains_key(key)
@@ -61,7 +63,7 @@ impl Store {
 
     /// Return the number of keys currently stored.
     pub fn len(&self) -> usize {
-        self.inner
+        self.db
             .read()
             .expect("store lock poisoned")
             .len()
@@ -74,7 +76,7 @@ impl Store {
 
     /// Return a snapshot of all key-value pairs as a sorted `Vec`.
     pub fn snapshot(&self) -> Vec<(String, String)> {
-        let guard = self.inner.read().expect("store lock poisoned");
+        let guard = self.db.read().expect("store lock poisoned");
         let mut pairs: Vec<(String, String)> = guard
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
