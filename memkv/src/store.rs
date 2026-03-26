@@ -23,7 +23,7 @@ impl Store {
     /// Create a new, empty store.
     pub fn new() -> Self {
         Store {
-            inner: Arc::new(RwLock::new(HashMap::new())),
+            db: Arc::new(RwLock::new(HashMap::new())),
         }
     }
 
